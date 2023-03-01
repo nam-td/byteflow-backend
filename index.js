@@ -9,12 +9,11 @@ const dotenv = require("dotenv");
 dotenv.config();
 mongoose.connect(process.env.MONGO_URL);
 
-
-
 app.use(cors({
   credentials: true,
-  origin: process.env.BASE_URL
+  origin: process.env.BASE_URL,
 }));
+app.set("trust proxy", 1);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/authentication", authenticationRouter);
 app.use("/posts", postsRouter);

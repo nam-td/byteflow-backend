@@ -126,11 +126,18 @@ router.post("/login", async (req, res) => {
       async (err, token) => {
         if (err) throw err;
 
-        res.cookie("token", token).status(200).json({
-          username: userDoc.username,
-          userid: userDoc._id,
-          msg: "Successfully logged in",
-        });
+        res
+          .cookie("token", token, {
+            secure: true,
+            httpOnly: false,
+            sameSite: "none",
+          })
+          .status(200)
+          .json({
+            username: userDoc.username,
+            userid: userDoc._id,
+            msg: "Successfully logged in",
+          });
       }
     );
   } else {
@@ -142,7 +149,7 @@ router.get("/profile", (req, res) => {
   const { token } = req.cookies;
   jwt.verify(token, process.env.JWT_SECRET, {}, (err, info) => {
     if (err) throw err;
-    res.json(info);
+    res.status(200).json(info);
   });
 });
 
