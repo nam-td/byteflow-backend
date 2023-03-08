@@ -209,13 +209,14 @@ router.post("/:userid/verify/:token", async (req, res) => {
   const token = req.body.token;
   try {
     const userDoc = await User.findOne({ _id: userId });
-    if (!userDoc) return res.status(400).json({ msg: "Invalid link", userDoc });
+    if (!userDoc)
+      return res.status(400).json({ msg: "Invalid link, invalid user id" });
     const tokenDoc = await Token.findOne({
       userId: userDoc._id,
       token: token,
     });
     if (!tokenDoc)
-      return res.status(400).json({ msg: "Invalid link", tokenDoc });
+      return res.status(400).json({ msg: "Invalid link, invalid token" });
     await User.findOneAndUpdate({ _id: userId }, { verified: true });
     await Token.findOneAndRemove({ token: token });
     res.status(200).json({ msg: "Email verified successfully" });
