@@ -11,7 +11,7 @@ mongoose.connect(process.env.MONGO_URL);
 
 app.use(cors({
   credentials: true,
-  origin: process.env.BASE_URL,
+  origin: [process.env.BASE_URL, "http://localhost:3000"],
 }));
 app.set("trust proxy", 1);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

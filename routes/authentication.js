@@ -28,7 +28,7 @@ router.post("/register", async (req, res) => {
       token: crypto.randomBytes(32).toString("hex"),
     });
 
-    const url = `${process.env.BASE_URL}${userDoc._id}/verify/${token.token}`;
+    const url = `${process.env.BASE_URL}/${userDoc._id}/verify/${token.token}`;
     await sendEmail(userDoc.email, "Verify Email", url);
     res.status(200).json({
       msg: "Registration successful. An email has been sent to your email address, please verify!",
@@ -73,7 +73,7 @@ router.post("/recover/password", async (req, res) => {
       userId: userId,
       token: crypto.randomBytes(32).toString("hex"),
     });
-    const url = `${process.env.BASE_URL}recover/password/${userId}/${tokenDoc.token}`;
+    const url = `${process.env.BASE_URL}/recover/password/${userId}/${tokenDoc.token}`;
     await sendEmail(
       userDoc.email,
       "Reset Password",
@@ -112,7 +112,7 @@ router.post("/login", async (req, res) => {
           userId: userDoc._id,
           token: crypto.randomBytes(32).toString("hex"),
         }).save();
-        const url = `${process.env.BASE_URL}${userDoc._id}/verify/${tokenDoc.token}`;
+        const url = `${process.env.BASE_URL}/${userDoc._id}/verify/${tokenDoc.token}`;
         await sendEmail(userDoc.email, "Verify Email", url);
       }
       return res.status(400).json({
