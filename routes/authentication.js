@@ -148,7 +148,11 @@ router.post("/login", async (req, res) => {
 router.get("/profile", (req, res) => {
   const { token } = req.cookies;
   jwt.verify(token, process.env.JWT_SECRET, {}, (err, info) => {
-    if (err) throw err;
+    if (err) {
+      res.status(400).json({msg: "Wrong credential"});
+      console.log(err);
+      throw err;
+    }
     res.status(200).json(info);
   });
 });
