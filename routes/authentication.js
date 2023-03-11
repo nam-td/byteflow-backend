@@ -146,15 +146,19 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/profile", (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, process.env.JWT_SECRET, {}, (err, info) => {
-    if (err) {
-      res.status(400).json({msg: "Wrong credential"});
-      console.log(err);
-      throw err;
-    }
-    res.status(200).json(info);
-  });
+  if (req.cookies.token) {
+    const { token } = req.cookies;
+    jwt.verify(token, process.env.JWT_SECRET, {}, (err, info) => {
+      if (err) {
+        res.status(400).json({ msg: "Wrong credential" });
+        console.log(err);
+        throw err;
+      }
+      res.status(200).json(info);
+    });
+  } else {
+    res.status(404).json({ msg: "User hasn't logged in" });
+  }
 });
 
 router.post("/logout", (req, res) => {
