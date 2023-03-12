@@ -17,17 +17,25 @@ router.use(cookieParser());
 // router.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 router.get("/search", async (req, res) => {
-  const page = req.query.page ? req.query.page : 0;
-  const query = `.*${req.query.q}.*`;
-  const resultsPerPage = 10;
-
   try {
-    const results = await Post.find({ title: { $regex: query, $options: "i" } })
+    let page = parseInt(req.query.page || 1);
+    const query = `.*${req.query.q}.*`;
+    const total = await Post.countDocuments({
+      title: { $regex: query, $options: "i" },
+    });
+    const pageSize = 10;
+    if (isNaN(page)) {
+      res.status(400).end();
+    }
+    if (page > Math.ceil(total / pageSize) || page < 1) {
+      page = 1;
+    }
+    const posts = await Post.find({ title: { $regex: query, $options: "i" } })
       .populate("author", ["username"])
       .sort({ createdAt: -1 })
-      .skip(page * resultsPerPage)
-      .limit(resultsPerPage);
-    res.json(results);
+      .skip(pageSize * (page - 1))
+      .limit(pageSize);
+    res.status(200).json({ posts, total: Math.ceil(total / pageSize) });
   } catch (err) {
     throw err;
   }
@@ -44,15 +52,26 @@ router
   .route("/")
   .get(async (req, res) => {
     const sortBy = req.query.sort ? req.query.sort : "normal";
+
     if (sortBy === "mostviewed") {
-      res.json(await Post.find().sort({ viewcount: -1 }).limit(5));
-    } else {
-      res.json(
-        await Post.find()
-          .populate("author", ["username"])
-          .sort({ createdAt: -1 })
-          .limit(10)
-      );
+      res.status(200).json(await Post.find().sort({ viewcount: -1 }).limit(5));
+    }
+    if (sortBy === "normal") {
+      let page = parseInt(req.query.page || 1);
+      const total = await Post.countDocuments({});
+      const pageSize = 10;
+      if (isNaN(page)) {
+        res.status(400).end();
+      }
+      if (page > Math.ceil(total / pageSize) || page < 1) {
+        page = 1;
+      }
+      const posts = await Post.find()
+        .populate("author", ["username"])
+        .sort({ createdAt: -1 })
+        .skip(pageSize * (page - 1))
+        .limit(pageSize);
+      res.status(200).json({ posts, total: Math.ceil(total / pageSize) });
     }
   })
   .post(uploadMiddleware.single("file"), async (req, res) => {
@@ -108,38 +127,75 @@ router
   });
 
 router.get("/tech", async (req, res) => {
-  res.json(
-    await Post.find({ tags: { $in: ["tech"] } })
-      .populate("author", ["username"])
-      .limit(10)
-      .sort({ createdAt: -1 })
-  );
+  let page = parseInt(req.query.page || 1);
+  const total = await Post.countDocuments({ tags: { $in: ["tech"] } });
+  const pageSize = 10;
+  if (isNaN(page)) {
+    res.status(400).end();
+  }
+  if (page > Math.ceil(total / pageSize) || page < 1) {
+    page = 1;
+  }
+  const posts = await Post.find({ tags: { $in: ["tech"] } })
+    .populate("author", ["username"])
+    .sort({ createdAt: -1 })
+    .skip(pageSize * (page - 1))
+    .limit(pageSize);
+  res.status(200).json({ posts, total: Math.ceil(total / pageSize) });
 });
 
 router.get("/reviews", async (req, res) => {
-  res.json(
-    await Post.find({ tags: { $in: ["reviews"] } })
-      .populate("author", ["username"])
-      .limit(10)
-      .sort({ createdAt: -1 })
-  );
+  let page = parseInt(req.query.page || 1);
+  const total = await Post.countDocuments({ tags: { $in: ["reviews"] } });
+  const pageSize = 10;
+  if (isNaN(page)) {
+    res.status(400).end();
+  }
+  if (page > Math.ceil(total / pageSize) || page < 1) {
+    page = 1;
+  }
+  const posts = await Post.find({ tags: { $in: ["reviews"] } })
+    .populate("author", ["username"])
+    .sort({ createdAt: -1 })
+    .skip(pageSize * (page - 1))
+    .limit(pageSize);
+  res.status(200).json({ posts, total: Math.ceil(total / pageSize) });
 });
+
 router.get("/science", async (req, res) => {
-  res.json(
-    await Post.find({ tags: { $in: ["science"] } })
-      .populate("author", ["username"])
-      .limit(10)
-      .sort({ createdAt: -1 })
-  );
+  let page = parseInt(req.query.page || 1);
+  const total = await Post.countDocuments({ tags: { $in: ["science"] } });
+  const pageSize = 10;
+  if (isNaN(page)) {
+    res.status(400).end();
+  }
+  if (page > Math.ceil(total / pageSize) || page < 1) {
+    page = 1;
+  }
+  const posts = await Post.find({ tags: { $in: ["science"] } })
+    .populate("author", ["username"])
+    .sort({ createdAt: -1 })
+    .skip(pageSize * (page - 1))
+    .limit(pageSize);
+  res.status(200).json({ posts, total: Math.ceil(total / pageSize) });
 });
 
 router.get("/entertainment", async (req, res) => {
-  res.json(
-    await Post.find({ tags: { $in: ["entertainment"] } })
-      .populate("author", ["username"])
-      .limit(10)
-      .sort({ createdAt: -1 })
-  );
+  let page = parseInt(req.query.page || 1);
+  const total = await Post.countDocuments({ tags: { $in: ["entertainment"] } });
+  const pageSize = 10;
+  if (isNaN(page)) {
+    res.status(400).end();
+  }
+  if (page > Math.ceil(total / pageSize) || page < 1) {
+    page = 1;
+  }
+  const posts = await Post.find({ tags: { $in: ["entertainment"] } })
+    .populate("author", ["username"])
+    .sort({ createdAt: -1 })
+    .skip(pageSize * (page - 1))
+    .limit(pageSize);
+  res.status(200).json({ posts, total: Math.ceil(total / pageSize) });
 });
 
 router
