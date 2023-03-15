@@ -216,7 +216,7 @@ router
         console.log("File Deleted Successfully!");
       });
       await Post.deleteOne({ _id: id });
-      res.status(204).json({ msg: "Yoru post was deleted successfully!" });
+      res.status(204).json({ msg: "Your post was deleted successfully!" });
     });
   });
 
