@@ -120,7 +120,7 @@ router.post("/login", async (req, res) => {
       });
     }
     jwt.sign(
-      { username, id: userDoc._id },
+      { username, id: userDoc._id, email: userDoc.email },
       process.env.JWT_SECRET,
       {},
       async (err, token) => {
@@ -155,6 +155,58 @@ router.get("/profile", (req, res) => {
         throw err;
       }
       res.status(200).json(info);
+    });
+  } else {
+    res.status(404).json({ msg: "User hasn't logged in" });
+  }
+});
+
+router.put("/accountsettings", async (req, res) => {
+  if (req.cookies.token) {
+    const { token } = req.cookies;
+    const { newEmail, oldPwd, newPwd } = req.body;
+
+    jwt.verify(token, process.env.JWT_SECRET, {}, async (err, info) => {
+      if (err) {
+        res.status(400).json({ msg: "Wrong credential" });
+        console.log(err);
+        throw err;
+      }
+      const { id } = info;
+      const userDoc = await User.findOne({ _id: id });
+
+      if (!userDoc) {
+        res.status(404).json({ msg: "Wrong credential!" });
+      }
+
+      if (newEmail && !oldPwd && !newPwd) {
+        userDoc.email = newEmail;
+        await userDoc.save();
+        res.status(200).json({ msg: "Updated changes successfully!" });
+      }
+
+      if (!newEmail && oldPwd && newPwd) {
+        const passOk = bcrypt.compareSync(oldPwd, userDoc.password);
+        if (!passOk) {
+          res.status(404).json({ msg: "Wrong credential!" });
+        } else {
+          userDoc.password = bcrypt.hashSync(newPwd, salt);
+          await userDoc.save();
+          res.status(200).json({ msg: "Updated changes successfully!" });
+        }
+      }
+
+      if (newEmail && oldPwd && newPwd) {
+        await userDoc.updateOne({ email: newEmail }).save();
+        const passOk = bcrypt.compareSync(oldPwd, userDoc.password);
+        if (!passOk) {
+          res.status(404).json({ msg: "Wrong credential!" });
+        } else {
+          userDoc.password = bcrypt.hashSync(newPwd, salt);
+          await userDoc.save();
+        }
+        res.status(200).json({ msg: "Updated changes successfully!" });
+      }
     });
   } else {
     res.status(404).json({ msg: "User hasn't logged in" });
