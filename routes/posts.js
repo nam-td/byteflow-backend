@@ -57,21 +57,29 @@ router
       res.status(200).json(await Post.find().sort({ viewcount: -1 }).limit(5));
     }
     if (sortBy === "normal") {
-      let page = parseInt(req.query.page || 1);
-      const total = await Post.countDocuments({});
-      const pageSize = 10;
-      if (isNaN(page)) {
-        res.status(400).end();
-      }
-      if (page > Math.ceil(total / pageSize) || page < 1) {
-        page = 1;
-      }
-      const posts = await Post.find()
+      if (req.query.page) {
+        let page = parseInt(req.query.page);
+        const total = await Post.countDocuments({});
+        const pageSize = 10;
+        if (isNaN(page)) {
+          res.status(400).end();
+        }
+        if (page > Math.ceil(total / pageSize) || page < 1) {
+          page = 1;
+        }
+        const posts = await Post.find()
+          .populate("author", ["username"])
+          .sort({ createdAt: -1 })
+          .skip(pageSize * (page - 1))
+          .limit(pageSize);
+        res.status(200).json({ posts, total: Math.ceil(total / pageSize) });
+      } else {
+        const total = await Post.countDocuments({});
+        const posts = await Post.find({})
         .populate("author", ["username"])
-        .sort({ createdAt: -1 })
-        .skip(pageSize * (page - 1))
-        .limit(pageSize);
-      res.status(200).json({ posts, total: Math.ceil(total / pageSize) });
+        .sort({createdAt: -1});
+        res.status(200).json({posts});
+      }
     }
   })
   .post(uploadMiddleware.single("file"), async (req, res) => {
