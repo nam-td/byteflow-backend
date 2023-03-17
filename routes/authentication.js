@@ -197,10 +197,11 @@ router.put("/accountsettings", async (req, res) => {
       }
 
       if (newEmail && oldPwd && newPwd) {
-        await userDoc.updateOne({ email: newEmail }).save();
+        userDoc.email = newEmail;
+        await userDoc.save();
         const passOk = bcrypt.compareSync(oldPwd, userDoc.password);
         if (!passOk) {
-          res.status(404).json({ msg: "Wrong credential!" });
+          res.status(404).json({ msg: "Wrong old password!" });
         } else {
           userDoc.password = bcrypt.hashSync(newPwd, salt);
           await userDoc.save();
