@@ -182,7 +182,25 @@ router.put("/accountsettings", async (req, res) => {
       if (newEmail && !oldPwd && !newPwd) {
         userDoc.email = newEmail;
         await userDoc.save();
-        res.status(200).json({ msg: "Updated changes successfully!" });
+        jwt.sign(
+          { username: userDoc.username, id: userDoc._id, email: userDoc.email },
+          process.env.JWT_SECRET,
+          {},
+          async (err, token) => {
+            if (err) throw err;
+
+            res
+              .cookie("token", token, {
+                secure: true,
+                httpOnly: false,
+                sameSite: "none",
+              })
+              .status(200)
+              .json({
+                msg: "Updated changes successfully!"
+              });
+          }
+        );
       }
 
       if (!newEmail && oldPwd && newPwd) {
@@ -206,7 +224,25 @@ router.put("/accountsettings", async (req, res) => {
           userDoc.password = bcrypt.hashSync(newPwd, salt);
           await userDoc.save();
         }
-        res.status(200).json({ msg: "Updated changes successfully!" });
+        jwt.sign(
+          { username: userDoc.username, id: userDoc._id, email: userDoc.email },
+          process.env.JWT_SECRET,
+          {},
+          async (err, token) => {
+            if (err) throw err;
+
+            res
+              .cookie("token", token, {
+                secure: true,
+                httpOnly: false,
+                sameSite: "none",
+              })
+              .status(200)
+              .json({
+                msg: "Updated changes successfully!"
+              });
+          }
+        );
       }
     });
   } else {
