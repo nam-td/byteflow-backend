@@ -10,8 +10,9 @@ dotenv.config();
 mongoose.connect(process.env.MONGO_URL);
 
 app.use(cors({
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
-  origin: [process.env.BASE_URL, "http://localhost:3000"],
+  origin: [process.env.BASE_URL, "http://localhost:3000", "https://byteflow-next.onrender.com/"],
 }));
 app.set("trust proxy", 1);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
