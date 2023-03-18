@@ -14,6 +14,7 @@ app.use(cors({
   credentials: true,
   origin: [process.env.BASE_URL, "http://localhost:3000", "https://byteflow-next.onrender.com/"],
 }));
+app.options('*', cors())
 app.set("trust proxy", 1);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/authentication", authenticationRouter);
