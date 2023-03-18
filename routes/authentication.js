@@ -69,11 +69,12 @@ router.post("/recover/password", async (req, res) => {
       .json({ msg: "No account is associated with this email!" });
   } else {
     const userId = userDoc._id;
+    const newToken = crypto.randomBytes(32).toString("hex");
     const tokenDoc = await Token.create({
       userId: userId,
-      token: crypto.randomBytes(32).toString("hex"),
+      token: newToken,
     });
-    const url = `${process.env.BASE_URL}/recover/password/${userId}/${tokenDoc.token}`;
+    const url = `${process.env.BASE_URL}/recover/password/${userId}/${newToken}`;
     await sendEmail(
       userDoc.email,
       "Reset Password",
